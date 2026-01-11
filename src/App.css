@@ -1,0 +1,130 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f6fa;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+}
+
+.navBrand {
+  font-weight: 700;
+}
+
+.navLinks {
+  display: flex;
+  gap: 12px;
+}
+
+.navLink {
+  text-decoration: none;
+  color: #333;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.navLink:hover {
+  background: #eee;
+}
+
+.page {
+  padding: 18px;
+}
+
+.card {
+  max-width: 650px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.title {
+  margin-top: 0;
+}
+
+.form {
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #bbb;
+}
+
+.button {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #222;
+  background: #222;
+  color: white;
+  cursor: pointer;
+}
+
+.button:hover {
+  opacity: 0.9;
+}
+
+.subtitle {
+  margin-bottom: 8px;
+}
+
+.muted {
+  color: #666;
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.listItem {
+  margin: 6px 0;
+}
+.listItemRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background: #fafafa;
+}
+
+.listItemText {
+  font-weight: 600;
+}
+
+.removeBtn {
+  border: 1px solid #ccc;
+  background: white;
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.removeBtn:hover {
+  background: #eee;
+}
