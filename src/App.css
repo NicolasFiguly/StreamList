@@ -1,9 +1,12 @@
+/* Global reset and base styling */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #f5f6fa;
+  color: #222;
 }
 
+/* Navigation bar */
 .nav {
   display: flex;
   justify-content: space-between;
@@ -15,11 +18,12 @@ body {
 
 .navBrand {
   font-weight: 700;
+  font-size: 1.1rem;
 }
 
 .navLinks {
   display: flex;
-  gap: 12px;
+  gap: 14px;
 }
 
 .navLink {
@@ -33,24 +37,33 @@ body {
   background: #eee;
 }
 
+/* Page layout */
 .page {
-  padding: 18px;
+  padding: 20px;
 }
 
+/* Card container used across all pages */
 .card {
-  max-width: 650px;
+  max-width: 700px;
   background: white;
   border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 18px;
+  border-radius: 14px;
+  padding: 20px;
 }
 
+/* Headings */
 .title {
   margin-top: 0;
+  margin-bottom: 12px;
 }
 
+.subtitle {
+  margin-bottom: 8px;
+}
+
+/* Form layout */
 .form {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .label {
@@ -69,6 +82,7 @@ body {
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #bbb;
+  font-size: 0.95rem;
 }
 
 .button {
@@ -78,36 +92,38 @@ body {
   background: #222;
   color: white;
   cursor: pointer;
+  font-size: 0.9rem;
 }
 
 .button:hover {
   opacity: 0.9;
 }
 
-.subtitle {
-  margin-bottom: 8px;
-}
-
+/* Text helpers */
 .muted {
   color: #666;
 }
 
-.list {
-  margin: 0;
-  padding-left: 18px;
+.placeholder {
+  margin-top: 6px;
+  line-height: 1.5;
 }
 
-.listItem {
-  margin: 6px 0;
+/* Movie list styling */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
+
 .listItemRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border: 1px solid #eee;
   border-radius: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   background: #fafafa;
 }
 
@@ -115,6 +131,7 @@ body {
   font-weight: 600;
 }
 
+/* Remove button */
 .removeBtn {
   border: 1px solid #ccc;
   background: white;
@@ -123,6 +140,7 @@ body {
   height: 28px;
   cursor: pointer;
   line-height: 1;
+  font-size: 0.9rem;
 }
 
 .removeBtn:hover {
