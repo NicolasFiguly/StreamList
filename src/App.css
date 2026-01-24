@@ -246,3 +246,88 @@ body {
   color: #1f4fd8;
   font-weight: 700;
 }
+
+.movieGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.movieCard {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 12px;
+  border: 1px solid var(--border, #e3e6ea);
+  background: #fbfcfe;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.moviePoster img {
+  width: 110px;
+  border-radius: 12px;
+  display: block;
+}
+
+.posterPlaceholder {
+  width: 110px;
+  height: 165px;
+  border-radius: 12px;
+  border: 1px dashed #c9cdd4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  background: white;
+  font-size: 0.9rem;
+}
+
+.movieTitleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.movieTitle {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.movieYear {
+  color: #6b7280;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.movieOverview {
+  margin: 8px 0 0 0;
+  color: #2c313a;
+  line-height: 1.4;
+}
+
+.notice {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #e3e6ea;
+  background: #fff;
+}
+
+.errorNotice {
+  border-color: #f0b4b4;
+  background: #fff5f5;
+}
+.ghostBtn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #e3e6ea);
+  background: white;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.ghostBtn:hover {
+  background: #f0f2f6;
+}

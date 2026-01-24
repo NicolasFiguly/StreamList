@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 export default function StreamList() {
   const [movieTitle, setMovieTitle] = useState("");
 
-  // Persist list across tab changes + page refresh
+  // Persist user events across navigation and refresh
   const [items, setItems] = useState(() => {
-    const saved = localStorage.getItem("streamlist-items");
+    const saved = localStorage.getItem("streamlist_user_events");
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -14,7 +14,7 @@ export default function StreamList() {
   const [editValue, setEditValue] = useState("");
 
   useEffect(() => {
-    localStorage.setItem("streamlist-items", JSON.stringify(items));
+    localStorage.setItem("streamlist_user_events", JSON.stringify(items));
   }, [items]);
 
   function normalize(text) {
@@ -30,8 +30,8 @@ export default function StreamList() {
     const normalized = normalize(cleanedTitle);
 
     setItems((prev) => {
-      const alreadyExists = prev.some((item) => item.normalized === normalized);
-      if (alreadyExists) return prev;
+      const exists = prev.some((item) => item.normalized === normalized);
+      if (exists) return prev;
 
       return [
         ...prev,
@@ -44,10 +44,6 @@ export default function StreamList() {
       ];
     });
 
-    // Display input in console
-    console.log("Movie added:", cleanedTitle);
-
-    // Clear input after submit
     setMovieTitle("");
   }
 
@@ -85,8 +81,6 @@ export default function StreamList() {
         item.id === id ? { ...item, title: cleaned, normalized } : item
       );
     });
-
-    console.log("Movie edited:", cleaned);
 
     setEditingId(null);
     setEditValue("");
@@ -133,7 +127,6 @@ export default function StreamList() {
               return (
                 <li key={item.id} className="listItemRow">
                   <div className="itemLeft">
-                    {/* Checkbox with a checkmark */}
                     <label
                       className="checkWrap"
                       title={item.completed ? "Uncomplete" : "Complete"}
@@ -156,7 +149,9 @@ export default function StreamList() {
                     ) : (
                       <span
                         className={
-                          item.completed ? "listItemText done" : "listItemText"
+                          item.completed
+                            ? "listItemText done"
+                            : "listItemText"
                         }
                       >
                         {item.title}
@@ -174,7 +169,9 @@ export default function StreamList() {
                           title="Save"
                           aria-label="Save"
                         >
-                          <span className="material-symbols-outlined">save</span>
+                          <span className="material-symbols-outlined">
+                            save
+                          </span>
                         </button>
 
                         <button
@@ -184,7 +181,9 @@ export default function StreamList() {
                           title="Cancel"
                           aria-label="Cancel"
                         >
-                          <span className="material-symbols-outlined">close</span>
+                          <span className="material-symbols-outlined">
+                            close
+                          </span>
                         </button>
                       </>
                     ) : (
@@ -195,12 +194,12 @@ export default function StreamList() {
                         title="Edit"
                         aria-label="Edit"
                       >
-                        {/* Pen-style icon */}
-                        <span className="material-symbols-outlined">edit</span>
+                        <span className="material-symbols-outlined">
+                          edit
+                        </span>
                       </button>
                     )}
 
-                    {/* Delete as an X */}
                     <button
                       type="button"
                       className="iconBtn"
@@ -208,7 +207,9 @@ export default function StreamList() {
                       title="Delete"
                       aria-label="Delete"
                     >
-                      <span className="material-symbols-outlined">close</span>
+                      <span className="material-symbols-outlined">
+                        close
+                      </span>
                     </button>
                   </div>
                 </li>
