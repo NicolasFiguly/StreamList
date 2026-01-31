@@ -1,46 +1,72 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+const KEY_QUERY = "tmdb-last-query";
+const KEY_RESULTS = "tmdb-last-results";
+
+function safeLoadJson(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return parsed;
+  } catch {
+    return fallback;
+  }
+}
 
 export default function Movies() {
   const apiKey = process.env.REACT_APP_TMDB_API_KEY;
 
   const [query, setQuery] = useState(() => {
-    return localStorage.getItem("tmdb-last-query") || "";
+    return localStorage.getItem(KEY_QUERY) || "";
   });
 
   const [results, setResults] = useState(() => {
-    const saved = localStorage.getItem("tmdb-last-results");
-    return saved ? JSON.parse(saved) : [];
+    const saved = safeLoadJson(KEY_RESULTS, []);
+    return Array.isArray(saved) ? saved : [];
   });
 
-  const [status, setStatus] = useState(() => {
-    return localStorage.getItem("tmdb-last-status") || "idle";
-  });
-
+  // Do not persist status to storage. Status is session-based.
+  const [status, setStatus] = useState("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
+  const abortRef = useRef(null);
+
   useEffect(() => {
-    localStorage.setItem("tmdb-last-query", query);
+    localStorage.setItem(KEY_QUERY, query);
   }, [query]);
 
   useEffect(() => {
-    localStorage.setItem("tmdb-last-results", JSON.stringify(results));
+    localStorage.setItem(KEY_RESULTS, JSON.stringify(results));
   }, [results]);
 
   useEffect(() => {
-    localStorage.setItem("tmdb-last-status", status);
-  }, [status]);
+    // Cleanup on unmount
+    return () => {
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, []);
 
   async function searchMovies(e) {
     e.preventDefault();
 
     const cleaned = query.trim();
-    if (!cleaned) return;
+    if (!cleaned) {
+      setStatus("error");
+      setErrorMsg("Please enter a movie title before searching.");
+      return;
+    }
 
     if (!apiKey) {
       setStatus("error");
       setErrorMsg("Missing TMDB API key. Check your .env file and restart the server.");
       return;
     }
+
+    // Abort any previous request before starting a new one
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setStatus("loading");
     setErrorMsg("");
@@ -52,7 +78,7 @@ export default function Movies() {
         `&query=${encodeURIComponent(cleaned)}` +
         "&include_adult=false&language=en-US&page=1";
 
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: controller.signal });
 
       if (!res.ok) {
         throw new Error(`TMDB request failed: ${res.status} ${res.statusText}`);
@@ -64,6 +90,8 @@ export default function Movies() {
       setResults(safeResults);
       setStatus("success");
     } catch (err) {
+      if (err.name === "AbortError") return;
+
       setStatus("error");
       setErrorMsg(err.message || "Something went wrong while searching TMDB.");
     }
@@ -75,9 +103,11 @@ export default function Movies() {
     setStatus("idle");
     setErrorMsg("");
 
-    localStorage.removeItem("tmdb-last-query");
-    localStorage.removeItem("tmdb-last-results");
-    localStorage.removeItem("tmdb-last-status");
+    localStorage.removeItem(KEY_QUERY);
+    localStorage.removeItem(KEY_RESULTS);
+
+    if (abortRef.current) abortRef.current.abort();
+    abortRef.current = null;
   }
 
   function posterUrl(path) {
@@ -128,11 +158,7 @@ export default function Movies() {
               {status === "loading" ? "Searching..." : "Search"}
             </button>
 
-            <button
-              className="ghostBtn"
-              type="button"
-              onClick={clearSearch}
-            >
+            <button className="ghostBtn" type="button" onClick={clearSearch}>
               Clear
             </button>
           </div>
@@ -157,6 +183,7 @@ export default function Movies() {
                     <img
                       src={posterUrl(m.poster_path)}
                       alt={`${m.title} poster`}
+                      loading="lazy"
                     />
                   ) : (
                     <div className="posterPlaceholder">No Image</div>
