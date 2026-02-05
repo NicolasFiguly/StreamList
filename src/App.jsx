@@ -5,6 +5,7 @@ import StreamList from "./pages/StreamList";
 import Movies from "./pages/Movies";
 import Cart from "./pages/Cart";
 import About from "./pages/About";
+import { CartProvider } from "./context/CartContext";
 
 function NotFound() {
   return (
@@ -22,17 +23,19 @@ function NotFound() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <NavBar />
-      <main>
-        <Routes>
-          <Route path="/" element={<StreamList />} />
-          <Route path="/movies" element={<Movies />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/about" element={<About />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
-    </BrowserRouter>
+    <CartProvider>
+      <BrowserRouter>
+        <NavBar />
+        <main>
+          <Routes>
+            <Route path="/" element={<StreamList />} />
+            <Route path="/movies" element={<Movies />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/about" element={<About />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+      </BrowserRouter>
+    </CartProvider>
   );
 }

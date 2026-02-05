@@ -13,8 +13,7 @@ export default function About() {
 
         <p className="muted">
           The Movies page connects to TMDB so I can search for a title and read
-          basic details like the release year and overview. This app will keep
-          growing later in the course, but the foundation is here now.
+          basic details like the release year and overview.
         </p>
       </div>
     </div>

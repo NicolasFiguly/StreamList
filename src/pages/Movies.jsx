@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useCart } from "../context/CartContext";
 
 const KEY_QUERY = "tmdb-last-query";
 const KEY_RESULTS = "tmdb-last-results";
@@ -14,23 +15,47 @@ function safeLoadJson(key, fallback) {
   }
 }
 
+function generatePrice(id) {
+  const safeId = Number(id) || 0;
+  const base = (safeId % 7) + 9; // 9–15
+  const cents = (safeId % 99) / 100;
+  return Number((base + cents).toFixed(2));
+}
+
 export default function Movies() {
   const apiKey = process.env.REACT_APP_TMDB_API_KEY;
+  const { addToCart, removeFromCart, isInCart } = useCart();
 
-  const [query, setQuery] = useState(() => {
-    return localStorage.getItem(KEY_QUERY) || "";
-  });
+  const [query, setQuery] = useState(() => localStorage.getItem(KEY_QUERY) || "");
 
   const [results, setResults] = useState(() => {
     const saved = safeLoadJson(KEY_RESULTS, []);
     return Array.isArray(saved) ? saved : [];
   });
 
-  // Do not persist status to storage. Status is session-based.
   const [status, setStatus] = useState("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
+  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+
   const abortRef = useRef(null);
+
+  useEffect(() => {
+    function handleOnline() {
+      setIsOnline(true);
+    }
+    function handleOffline() {
+      setIsOnline(false);
+    }
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(KEY_QUERY, query);
@@ -41,7 +66,6 @@ export default function Movies() {
   }, [results]);
 
   useEffect(() => {
-    // Cleanup on unmount
     return () => {
       if (abortRef.current) abortRef.current.abort();
     };
@@ -57,19 +81,27 @@ export default function Movies() {
       return;
     }
 
+    // Clear any previous error banner when trying again
+    setErrorMsg("");
+
+    // If offline, do not attempt fetch. Keep showing saved results.
+    if (!isOnline) {
+      setStatus("error");
+      setErrorMsg("You are offline. Showing your last saved results instead of a live TMDB search.");
+      return;
+    }
+
     if (!apiKey) {
       setStatus("error");
       setErrorMsg("Missing TMDB API key. Check your .env file and restart the server.");
       return;
     }
 
-    // Abort any previous request before starting a new one
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
     setStatus("loading");
-    setErrorMsg("");
 
     try {
       const url =
@@ -91,7 +123,6 @@ export default function Movies() {
       setStatus("success");
     } catch (err) {
       if (err.name === "AbortError") return;
-
       setStatus("error");
       setErrorMsg(err.message || "Something went wrong while searching TMDB.");
     }
@@ -131,9 +162,13 @@ export default function Movies() {
     <div className="page">
       <div className="card">
         <h1 className="title">Movies</h1>
-        <p className="muted placeholder">
-          Search TMDB and review movie information on this page.
-        </p>
+        <p className="muted placeholder">Search TMDB and review movie information on this page.</p>
+
+        {!isOnline && (
+          <div className="notice">
+            <strong>Offline mode:</strong> Live search is unavailable. Previously saved results can still display.
+          </div>
+        )}
 
         <form onSubmit={searchMovies} className="form">
           <label className="label" htmlFor="movieSearch">
@@ -150,11 +185,7 @@ export default function Movies() {
               placeholder="Example: The Matrix"
             />
 
-            <button
-              className="button"
-              type="submit"
-              disabled={status === "loading"}
-            >
+            <button className="button" type="submit" disabled={status === "loading"}>
               {status === "loading" ? "Searching..." : "Search"}
             </button>
 
@@ -164,9 +195,9 @@ export default function Movies() {
           </div>
         </form>
 
-        {status === "error" && (
+        {status === "error" && errorMsg && (
           <div className="notice errorNotice">
-            <strong>Search failed:</strong> {errorMsg}
+            <strong>Search notice:</strong> {errorMsg}
           </div>
         )}
 
@@ -176,39 +207,58 @@ export default function Movies() {
 
         {results.length > 0 && (
           <div className="movieGrid">
-            {results.map((m) => (
-              <div key={m.id} className="movieCard">
-                <div className="moviePoster">
-                  {m.poster_path ? (
-                    <img
-                      src={posterUrl(m.poster_path)}
-                      alt={`${m.title} poster`}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="posterPlaceholder">No Image</div>
-                  )}
-                </div>
+            {results.map((m) => {
+              const inCart = isInCart(m.id);
+              const price = generatePrice(m.id);
 
-                <div className="movieInfo">
-                  <div className="movieTitleRow">
-                    <h2 className="movieTitle">{m.title}</h2>
-                    <span className="movieYear">
-                      {yearFromDate(m.release_date)}
-                    </span>
+              return (
+                <div key={m.id} className="movieCard">
+                  <div className="moviePoster">
+                    {m.poster_path ? (
+                      <img src={posterUrl(m.poster_path)} alt={`${m.title} poster`} loading="lazy" />
+                    ) : (
+                      <div className="posterPlaceholder">No Image</div>
+                    )}
                   </div>
 
-                  <p className="movieOverview">{shortOverview(m.overview)}</p>
+                  <div className="movieInfo">
+                    <div className="movieTitleRow">
+                      <h2 className="movieTitle">{m.title}</h2>
+                      <span className="movieYear">{yearFromDate(m.release_date)}</span>
+                    </div>
+
+                    <p className="movieOverview">{shortOverview(m.overview)}</p>
+
+                    <p className="muted" style={{ margin: "8px 0 0 0" }}>
+                      Price: ${price.toFixed(2)}
+                    </p>
+
+                    <div className="movieActions">
+                      {!inCart ? (
+                        <button className="button" type="button" onClick={() => addToCart(m)}>
+                          Add to Cart
+                        </button>
+                      ) : (
+                        <>
+                          <button className="button" type="button" disabled>
+                            In Cart
+                          </button>
+
+                          <button className="ghostBtn" type="button" onClick={() => removeFromCart(m.id)}>
+                            Remove
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
         {status === "idle" && results.length === 0 && (
-          <p className="muted">
-            Enter a movie title above and click Search to view results.
-          </p>
+          <p className="muted">Enter a movie title above and click Search to view results.</p>
         )}
       </div>
     </div>
